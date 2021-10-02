@@ -1,0 +1,12 @@
+{
+  "name": "vrm_dart",
+  "scripts": {
+    "prepare": "husky install",
+    "format": "make format",
+    "test": "dart test"
+  },
+  "author": "GATARI, Inc.",
+  "devDependencies": {
+    "husky": "^7.0.0"
+  }
+}
