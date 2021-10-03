@@ -9,3 +9,7 @@ build-runner:
 .PHONY: format
 format:
 	dart format ./lib
+
+.PHONY: example
+example:
+	cd example; flutter run -d chrome

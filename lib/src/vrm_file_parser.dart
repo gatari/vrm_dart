@@ -7,26 +7,29 @@ import 'package:json_annotation/json_annotation.dart';
 part 'vrm_file_parser.g.dart';
 
 final Endian _endian = Endian.little;
-final int _magicGltf = 0x676c5446;
 final int _glbFileHeaderSize = 12;
 final int _glbChunkLengthSize = 4;
 final int _glbChunkTypeSize = 4;
 final int _glbChunkHeaderSize = _glbChunkLengthSize + _glbChunkTypeSize;
-final int _glbChunkTypeJson = 0x4e4f534a;
+final int _glbBodyHeaderSize = 8;
 
 class VrmFileParser {
   final ByteData _byteData;
 
   late VrmMeta vrmMeta;
-  late ByteData? thumbnailByteData;
+  late Uint8List? thumbnailByteData;
 
   VrmFileParser(this._byteData);
 
   void parse() {
-    final offset = _glbFileHeaderSize;
-    var chunkLength = _byteData.getUint32(offset, _endian);
-    final jsonChunk = Uint8List.view(
-        _byteData.buffer, offset + _glbChunkHeaderSize, chunkLength);
+    // https://kcoley.github.io/glTF/extensions/1.0/Khronos/KHR_binary_glTF/
+    final magic = Uint8List.sublistView(_byteData, 0, 4);
+    if (ascii.decode(magic) != 'glTF') {
+      throw Exception('this is not glTF');
+    }
+    final contentLength = _byteData.getUint32(_glbFileHeaderSize, _endian);
+    final jsonChunk = Uint8List.view(_byteData.buffer,
+        _glbFileHeaderSize + _glbChunkHeaderSize, contentLength);
     final jsonText = utf8.decode(jsonChunk);
     final json = jsonDecode(jsonText) as Map<String, dynamic>;
 
@@ -44,8 +47,16 @@ class VrmFileParser {
       return;
     }
     final view = vrmJson.bufferViews[thumbnailImage.bufferView];
-    thumbnailByteData = ByteData.view(_byteData.buffer,
-        offset + _glbChunkHeaderSize + view.byteOffset, view.byteLength);
+
+    thumbnailByteData = Uint8List.view(
+      _byteData.buffer,
+      _glbFileHeaderSize +
+          _glbChunkHeaderSize +
+          contentLength +
+          _glbBodyHeaderSize +
+          view.byteOffset,
+      view.byteLength,
+    );
   }
 }
 
