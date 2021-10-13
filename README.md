@@ -13,6 +13,8 @@ and the Flutter guide for
 
 VRM Meta data loader for dart/flutter
 
+![FAz_8VtX0AQ4xBu](https://user-images.githubusercontent.com/9528225/137154674-9fc25b95-4736-4e2c-9e70-d6b5618506ab.png)
+
 ## Features
 
 - [x] Extract meta data
